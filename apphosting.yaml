@@ -1,0 +1,33 @@
+runConfig:
+  minInstances: 0
+  maxInstances: 20
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: NODE_ENV
+    value: production
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: DEEPSEEK_BASE_URL
+    value: https://api.deepseek.com
+    availability:
+      - RUNTIME
+  - variable: DEEPSEEK_MODEL
+    value: deepseek-chat
+    availability:
+      - RUNTIME
+  - variable: DEEPSEEK_TIMEOUT_MS
+    value: "45000"
+    availability:
+      - RUNTIME
+  - variable: OPENAI_API_KEY
+    secret: openai-api-key
+    availability:
+      - RUNTIME
+  - variable: VITE_WECHAT_PROVIDER_ID
+    value: oidc.wechat
+    availability:
+      - BUILD

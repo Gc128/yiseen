@@ -1,0 +1,6 @@
+{
+  "name": "Yiseen",
+  "description": "极简现代心理能量美学测算，Easily seen, Easy everything.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_AI_API"]
+}

@@ -1,0 +1,65 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return request.auth != null && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidUserProfile(data, uid) {
+      return data.userId == uid
+             && data.createdAt is number
+             && data.updatedAt is number;
+    }
+    
+    function isValidCalculationRecord(data, uid) {
+      return data.userId == uid
+             && data.createdAt is number
+             && data.bazi is string
+             && data.dayMaster is string
+             && data.periods is map;
+    }
+
+    function isValidSharedCalculation(data, shareId) {
+      return data.shareId == shareId
+             && isValidId(shareId)
+             && data.createdAt is number
+             && data.expiresAt is number
+             && data.bazi is string
+             && data.dayMaster is string
+             && data.periods is map
+             && data.userInput is map;
+    }
+
+    // Rules for Users
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+                    && isValidId(userId)
+                    && isValidUserProfile(incoming(), userId);
+      allow update: if isOwner(userId)
+                    && incoming().userId == existing().userId
+                    && incoming().createdAt == existing().createdAt;
+      
+      // Calculations subcollection
+      match /calculations/{calculationId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+                      && isValidCalculationRecord(incoming(), userId);
+      }
+    }
+
+    // Share snapshots are created and read by the server API with Admin SDK.
+    match /sharedCalculations/{shareId} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: yiseen
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm install --prefix functions && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEEPSEEK_BASE_URL
+        value: https://api.deepseek.com
+      - key: DEEPSEEK_MODEL
+        value: deepseek-chat
+      - key: DEEPSEEK_TIMEOUT_MS
+        value: "45000"
+      - key: FIRESTORE_DATABASE_ID
+        value: ai-studio-9e78684d-5bd5-4001-9fa5-f6b8a6fda0e8
+      - key: VITE_WECHAT_PROVIDER_ID
+        value: oidc.wechat
+      - key: OPENAI_API_KEY
+        sync: false

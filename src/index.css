@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif-sc: "Noto Serif SC", "Playfair Display", serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(170deg, #7DB2E8 0%, #C9E0F5 45%, #EBEFF8 100%);
+  color: #2C2B36;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* lock scroll if using 100vh app container */
+  overflow: hidden;
+}
+
+/* Glassmorphism utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.glass-box {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+

@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "userProfile": {
+      "title": "User Profile",
+      "description": "User's demographic and birth info used for energy calculations.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "gender": { "type": "string", "enum": ["male", "female"] },
+        "dateOfBirth": { "type": "string" },
+        "timeOfBirth": { "type": "string" },
+        "birthYear": { "type": "number" },
+        "birthMonth": { "type": "number" },
+        "birthDay": { "type": "number" },
+        "birthHour": { "type": "number" },
+        "province": { "type": "string" },
+        "city": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["userId", "createdAt"]
+    },
+    "calculationRecord": {
+      "title": "Calculation Record",
+      "description": "Output of an energy calculation for a given target time.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "targetYear": { "type": "number" },
+        "targetMonth": { "type": "number" },
+        "targetDay": { "type": "number" },
+        "targetHour": { "type": "string" },
+        "bazi": { "type": "string" },
+        "dayMaster": { "type": "string" },
+        "score": { "type": "number" },
+        "periods": { "type": "object" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["userId", "bazi", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "userProfile" },
+      "description": "Stores user's main profile and default bazi information."
+    },
+    "users/{userId}/calculations/{calculationId}": {
+      "schema": { "$ref": "calculationRecord" },
+      "description": "A specific energy calculation result ran by the user."
+    }
+  }
+}
