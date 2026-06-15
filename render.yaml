@@ -12,7 +12,7 @@ services:
       - key: DEEPSEEK_BASE_URL
         value: https://api.deepseek.com
       - key: DEEPSEEK_MODEL
-        value: deepseek-chat
+        value: deepseek-v4-pro
       - key: DEEPSEEK_TIMEOUT_MS
         value: "45000"
       - key: FIRESTORE_DATABASE_ID

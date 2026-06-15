@@ -16,7 +16,7 @@ app.use(express.json({ limit: "64kb" }));
 type DeepSeekMessage = { role: "system" | "user"; content: string };
 
 const DEEPSEEK_BASE_URL = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
-const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-chat";
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-v4-pro";
 const DEEPSEEK_TIMEOUT_MS = Number(process.env.DEEPSEEK_TIMEOUT_MS || 45000);
 
 function getAIKey(): string {

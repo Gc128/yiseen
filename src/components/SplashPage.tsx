@@ -21,6 +21,9 @@ export default function SplashPage() {
         <p className="text-white/90 font-light tracking-widest text-lg sm:text-xl" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
           See what unfolds in your day
         </p>
+        <p className="mt-3 text-white/80 font-light tracking-widest text-xs uppercase" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+          DeepSeek v4 Pro
+        </p>
       </motion.div>
 
       <motion.div

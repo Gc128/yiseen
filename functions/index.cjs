@@ -14,7 +14,7 @@ const adminApp = initializeApp();
 const FIRESTORE_DATABASE_ID = process.env.FIRESTORE_DATABASE_ID || "ai-studio-9e78684d-5bd5-4001-9fa5-f6b8a6fda0e8";
 const db = getFirestore(adminApp, FIRESTORE_DATABASE_ID);
 const DEEPSEEK_BASE_URL = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
-const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-chat";
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-v4-pro";
 const DEEPSEEK_TIMEOUT_MS = Number(process.env.DEEPSEEK_TIMEOUT_MS || 45000);
 
 function getAIKey() {
