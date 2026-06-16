@@ -13,6 +13,8 @@ services:
         value: https://api.deepseek.com
       - key: DEEPSEEK_MODEL
         value: deepseek-v4-pro
+      - key: DEEPSEEK_FALLBACK_MODEL
+        value: deepseek-v4-flash
       - key: DEEPSEEK_TIMEOUT_MS
         value: "45000"
       - key: FIRESTORE_DATABASE_ID

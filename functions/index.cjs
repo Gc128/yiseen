@@ -15,6 +15,7 @@ const FIRESTORE_DATABASE_ID = process.env.FIRESTORE_DATABASE_ID || "ai-studio-9e
 const db = getFirestore(adminApp, FIRESTORE_DATABASE_ID);
 const DEEPSEEK_BASE_URL = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-v4-pro";
+const DEEPSEEK_FALLBACK_MODEL = process.env.DEEPSEEK_FALLBACK_MODEL || "deepseek-v4-flash";
 const DEEPSEEK_TIMEOUT_MS = Number(process.env.DEEPSEEK_TIMEOUT_MS || 45000);
 
 function getAIKey() {
@@ -73,7 +74,18 @@ function extractJson(text) {
   }
 }
 
-async function generateWithDeepSeek(messages) {
+function isTransientAIError(err) {
+  const message = String((err && err.message) || "");
+  return (err && err.name === "AbortError")
+    || (err && err.status === 408)
+    || (err && err.status === 429)
+    || (err && err.status >= 500)
+    || message.includes("503")
+    || message.includes("high demand")
+    || message.includes("UNAVAILABLE");
+}
+
+async function generateWithDeepSeek(messages, model = DEEPSEEK_MODEL) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), DEEPSEEK_TIMEOUT_MS);
   try {
@@ -84,7 +96,7 @@ async function generateWithDeepSeek(messages) {
         "Authorization": `Bearer ${getAIKey()}`
       },
       body: JSON.stringify({
-        model: DEEPSEEK_MODEL,
+        model,
         messages,
         temperature: 0.72,
         response_format: { type: "json_object" }
@@ -227,35 +239,46 @@ app.post("/api/calculate-energy", async (req, res) => {
 
 请保证每个周期的description有2-3个短句/短段，简洁但有判断依据；四个方面至少包含事业、财运、感情、健康。`;
 
+    const messages = [
+      { role: "system", content: systemInstruction },
+      { role: "user", content: prompt }
+    ];
+    const models = Array.from(new Set([DEEPSEEK_MODEL, DEEPSEEK_FALLBACK_MODEL].filter(Boolean)));
     let response;
-    let retries = 3;
-    let delay = 1000;
+    let lastError;
 
-    while (retries > 0) {
-      try {
-        response = await generateWithDeepSeek([
-          { role: "system", content: systemInstruction },
-          { role: "user", content: prompt }
-        ]);
-        break;
-      } catch (err) {
-        retries--;
-        const isUnavailable = err.name === "AbortError" || err.status === 408 || err.status === 429 || err.status >= 500;
-        if (isUnavailable && retries > 0) {
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2;
-        } else {
-          throw err;
+    for (const model of models) {
+      let retries = model === DEEPSEEK_MODEL ? 2 : 1;
+      let delay = 800;
+
+      while (retries > 0) {
+        try {
+          response = await generateWithDeepSeek(messages, model);
+          break;
+        } catch (err) {
+          lastError = err;
+          retries--;
+          if (isTransientAIError(err) && retries > 0) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2;
+            continue;
+          }
+          break;
         }
       }
+
+      if (response) break;
+      if (lastError && !isTransientAIError(lastError)) throw lastError;
     }
+
+    if (!response) throw lastError || new Error("AI没有返回有效的能量结果");
 
     res.json(response);
   } catch (err) {
     console.error("Calculate energy error:", err);
     let errorMessage = err.message || "能量调谐失败，请稍后重试";
     if (err.name === "AbortError" || err.status === 503 || errorMessage.includes("503") || errorMessage.includes("high demand") || errorMessage.includes("UNAVAILABLE")) {
-      errorMessage = "目前测算宇宙能量的人数较多，请稍后重试～";
+      errorMessage = "当前主模型响应繁忙，备用模型也未能完成，请稍后重试。";
     } else if (err.status === 401 || err.status === 403) {
       errorMessage = "AI接口密钥未配置或无权限，请联系管理员检查环境变量。";
     } else if (err.status === 429 || errorMessage.includes("429") || errorMessage.includes("quota") || errorMessage.includes("Quota exceeded") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
